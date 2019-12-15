@@ -1,0 +1,48 @@
+﻿+++ Solution Folders
+
+Domain
+Infra.Bus
+Infra.IoC
+Microservices
+Presentation
+
++++ Projects
+I. Domain Folder
+1. MicroRabbit.Domain.Core
+- Entities needed for the Bus
+- CQRS using MediatR
+- Bus folder, Events folder
+- Install via Nuget: MediatR 7.0.0
+
+1.1 Create folders
+- Bus, Commands, Events
+
+1.2 IEventBus
+- Create MicroRabbit.Domain.Core/Bus/IEventBus.cs
+- We can have multiple service bus in the future (e.g. NServiceBus, RabbitMq, Mass Transit)
+
+1.3 Create methods for IEventBus
+Task SendCommand<T>(T command) where T : Command;
+void Publish<T>(T @event) where T : Event;
+void Subscribe<T, TH>() where T : Event where TH : IEventHandler<T>;
+
+Note: 
+void Publish<T>(T @event) where T : Event;
+- If we want to use event (reserved keyword) we have to use @
+
+1.4 Create IEventHandler
+public interface IEventHandler<in TEvent> : IEventHandler where TEvent : Event
+
+1.5 Create abstract class Command
+public abstract class Command : Message
+
+1.7 Create abstract class Message
+public abstract class Message : IRequest<bool>
+
+1.8 Create abstract class Event
+public abstract class Events
+
+1.9 Set References for Message and Event
+
+Conclusion: 
+- To use, Implement IEventBus and design concrete implementation of SendCommand, Publish, Subscribe

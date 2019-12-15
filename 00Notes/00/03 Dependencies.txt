@@ -1,0 +1,4 @@
+﻿+++ Dependencies
+
+1. RabbitMQ.Client 5.1.2
+2. MediatR 7.0.0
