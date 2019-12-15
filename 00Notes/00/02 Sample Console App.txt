@@ -1,0 +1,61 @@
+﻿+++ Basic Functionality
+
+1. Create new Console App project (Producer)
+2. Add Dependencies
+- RabbitMQ.Client 5.1.0
+3. Sample code for Producer
+ public class Sender
+    {
+        public static void Main(string[] args)
+        {
+            var factory = new ConnectionFactory { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare("BasicTest", false, false, false, null);
+
+                string message = "Getting started with .Net Core RabbitMQ";
+                var body = Encoding.UTF8.GetBytes(message);
+
+                channel.BasicPublish("", "BasicTest", null, body);
+                Console.WriteLine("Sent message {0}...", message);
+            }
+
+            Console.WriteLine("Press [enter] to exit the Sender App...");
+            Console.ReadLine();
+        }
+    }
+
+4. Sample code for Consumer
+public class Receiver
+    {
+        public static void Main(string[] args)
+        {
+            var factory = new ConnectionFactory { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare("BasicTest", false, false, false, null);
+
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (model, ea) =>
+                {
+                    var body = ea.Body;
+                    var message = Encoding.UTF8.GetString(body);
+                    Console.WriteLine("Received message {0}...", message);
+                };
+
+                channel.BasicConsume("BasicTest", true, consumer);
+
+                Console.WriteLine("Press [enter] to exit the Sender App...");
+                Console.ReadLine();
+            }
+        }
+    }
+
+5. Verify functionality
+- Start new instance of Producer
+- Verify under Queues tab, Get Message
+http://localhost:15672/#/queues/
+- Start new instance of Consumer
+- Verify under Queues tab, Message should now be consumed
