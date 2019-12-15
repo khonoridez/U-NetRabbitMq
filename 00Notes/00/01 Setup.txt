@@ -1,0 +1,30 @@
+﻿
+++++ Installation
+1. Install Erlang
+https://www.erlang.org/downloads
+
+2. Install RabbitMq
+https://www.rabbitmq.com/install-windows.html#run-windows
+
+++++ Setup
+1. Enable Management Console
+> rabbitmq-plugins enable rabbitmq_management
+- started 3 plugins
+
+2. Browse admin dashboard via localhost:15672
+guest / guest
+
+++++ Commands
+Stop app
+> rabbitmqctl stop_app
+
+Start app
+> rabbitmqctl start_app
+
+User
+> rabbitmqctl add_user test test
+> rabbitmqctl set_user_tags test administrator
+
+Set Read and Write for everything
+> rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
+

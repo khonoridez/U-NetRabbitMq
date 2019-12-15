@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "U-NetRabbitMq", "U-NetRabbitMq\U-NetRabbitMq.csproj", "{CFE7BCB4-0FF7-4B23-BE39-44C440CF994D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "00Notes", "00Notes\00Notes.csproj", "{049A61FA-0D97-476C-9F9B-9EE2F122CADF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CFE7BCB4-0FF7-4B23-BE39-44C440CF994D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CFE7BCB4-0FF7-4B23-BE39-44C440CF994D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CFE7BCB4-0FF7-4B23-BE39-44C440CF994D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CFE7BCB4-0FF7-4B23-BE39-44C440CF994D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{049A61FA-0D97-476C-9F9B-9EE2F122CADF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{049A61FA-0D97-476C-9F9B-9EE2F122CADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{049A61FA-0D97-476C-9F9B-9EE2F122CADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{049A61FA-0D97-476C-9F9B-9EE2F122CADF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
