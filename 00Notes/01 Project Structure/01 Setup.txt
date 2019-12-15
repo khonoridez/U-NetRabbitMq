@@ -1,0 +1,7 @@
+﻿+++ Solution Folders
+
+Domain
+Infra.Bus
+Infra.IoC
+Microservices
+Presentation
