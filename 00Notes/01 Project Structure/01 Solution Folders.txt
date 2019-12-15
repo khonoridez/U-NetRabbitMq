@@ -1,0 +1,8 @@
+﻿+++ Solution Folders
+
+1. Domain
+2. Infra.Bus
+3. Infra.IoC
+4. Microservices
+5. Presentation
+

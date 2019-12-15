@@ -1,13 +1,5 @@
-﻿+++ Solution Folders
+﻿+++ Domain Folder
 
-Domain
-Infra.Bus
-Infra.IoC
-Microservices
-Presentation
-
-+++ Projects
-I. Domain Folder
 1. MicroRabbit.Domain.Core
 - Entities needed for the Bus
 - CQRS using MediatR
