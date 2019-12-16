@@ -1,0 +1,16 @@
+﻿
+1. Create Project
+Infra.IoC/MicroRabbit.Infra.IoC
+-.Net Core Class Library
+
+2. Install Dependency Injection
+Microsoft.Extensions.DependencyInjection
+
+3. Create DependencyContainer.cs
+public class DependencyContainer
+{
+    public static void RegisterServices(IServiceCollection services)
+    {
+        services.AddTransient<IEventBus, RabbitMQBus>();
+    }
+}
