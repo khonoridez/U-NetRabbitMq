@@ -1,4 +1,5 @@
 ﻿
++++ RabbitMQBus.cs
 1. Create new project MicroRabbit.Infra.Bus
 
 2. Create class RabbitMQBus.cs
@@ -8,13 +9,9 @@ public sealed class RabbitMQBus : IEventBus
 3.1 Implement in RabbitMQBus.cs
 private readonly IMediator _mediator;
 
-3.2 Use in SendCommand
-public Task SendCommand<T>(T command) where T : Command
-{
-    return _mediator.Send(command);
-}
+4.Install package RabbitMQ.Client
 
-4. Inject properties in constructor
+5. Inject properties in constructor
 private readonly IMediator _mediator;
 private readonly Dictionary<string, List<Type>> _handlers;
 private readonly List<Type> _eventTypes;
@@ -26,12 +23,16 @@ public RabbitMQBus(IMediator mediator)
     _eventTypes = new List<Type>();
 }
 
-5.Install package RabbitMQ.Client
++++ SendCommand
+1. Use in SendCommand
+public Task SendCommand<T>(T command) where T : Command
+{
+    return _mediator.Send(command);
+}
 
-6. Implement in Publish
-6.1 Install Newtonsoft.Json 12.0.3
-
-6.2 Implement publish
++++ Publish
+1. Install Newtonsoft.Json 12.0.3
+2. Implement publish
 // Create factory via RabbitMq, localhost as the service name
 var factory = new ConnectionFactory { HostName = "localhost" };
 
@@ -53,3 +54,99 @@ using (var channel = connection.CreateModel())
     channel.BasicPublish("", eventName, null, body);
 }
 
++++ Subscribe
+1. Implement Subscribe
+public void Subscribe<T, TH>()
+    where T : Event
+    where TH : IEventHandler<T>
+{
+	// get event name and handler type
+	var eventName = typeof(T).Name;
+    var handlerType = typeof(TH);
+
+    if (!_eventTypes.Contains(typeof(T)))
+        _eventTypes.Add(typeof(T));
+
+	// Add in dictionary if not exist Dictionary<string, List<Type>> _handlers;
+    if (!_handlers.ContainsKey(eventName))
+        _handlers.Add(eventName, new List<Type>());
+	
+    if (_handlers[eventName].Any(s => s.GetType() == handlerType))
+        throw new ArgumentException($"Handler Type {handlerType.Name} already registered for '{eventName}'",
+            nameof(handlerType));
+
+	StartBasicConsume<T>();
+}
+
+2. Implement Start Basic Consume method
+private void StartBasicConsume<T>() where T : Event
+{
+	// Create factory via RabbitMq, DispatchConsumersAsync
+    var factory = new ConnectionFactory()
+    {
+        HostName = "localhost",
+        DispatchConsumersAsync = true
+    };
+
+    var connection = factory.CreateConnection();
+    var channel = connection.CreateModel();
+
+    var eventName = typeof(T).Name;
+
+    channel.QueueDeclare(eventName, false, false, false, null);
+
+	// From RabbitMQ.Client.Events
+    var consumer = new AsyncEventingBasicConsumer(channel);
+    consumer.Received += Consumer_Received;
+
+	// From RabbitMQ.Client
+    channel.BasicConsume(eventName, true, consumer);
+}
+
+3. Implement Consumer_Received delegate
+- Message has come in to our queue, message is published via Event Bus Api
+- A Receiver is subscribed to this event
+- We need a way to pick the message and convert it to an actual object
+- We send this to the Event Bus of the Receiver that is handling this type of event
+private async Task Consumer_Received(object sender, BasicDeliverEventArgs e)
+{
+    var eventName = e.RoutingKey;
+    var message = Encoding.UTF8.GetString(e.Body);
+
+    try
+    {
+        // knows which handler is subscribed to the type of eventName
+        await ProcessEvent(eventName, message).ConfigureAwait(false);
+    }
+    catch (Exception ex)
+    {
+        throw;
+    }
+}
+
+4. Implement Process Event
+private async Task ProcessEvent(string eventName, string message)
+{
+    if (_handlers.ContainsKey(eventName))
+    {
+        var subscriptions = _handlers[eventName];
+
+        // loop through all the handlers
+        foreach (var subscription in subscriptions)
+        {
+            // Activator Class Contains methods to create types of objects locally or remotely, or obtain references to existing remote objects
+            var handler = Activator.CreateInstance(subscription);
+
+            if (handler == null) continue;
+
+            var eventType = _eventTypes.SingleOrDefault(t => t.Name == eventName);
+            var @event = JsonConvert.DeserializeObject(message, eventType);
+
+			// All events inherit IEventHandler
+            var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
+
+			// Invoke handler and pass the event
+            await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+        }
+    }
+}
