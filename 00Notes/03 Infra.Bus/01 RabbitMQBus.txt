@@ -1,0 +1,55 @@
+﻿
+1. Create new project MicroRabbit.Infra.Bus
+
+2. Create class RabbitMQBus.cs
+public sealed class RabbitMQBus : IEventBus
+
+3. Install package MediatR
+3.1 Implement in RabbitMQBus.cs
+private readonly IMediator _mediator;
+
+3.2 Use in SendCommand
+public Task SendCommand<T>(T command) where T : Command
+{
+    return _mediator.Send(command);
+}
+
+4. Inject properties in constructor
+private readonly IMediator _mediator;
+private readonly Dictionary<string, List<Type>> _handlers;
+private readonly List<Type> _eventTypes;
+
+public RabbitMQBus(IMediator mediator)
+{
+    _mediator = mediator;
+    _handlers = new Dictionary<string, List<Type>>();
+    _eventTypes = new List<Type>();
+}
+
+5.Install package RabbitMQ.Client
+
+6. Implement in Publish
+6.1 Install Newtonsoft.Json 12.0.3
+
+6.2 Implement publish
+// Create factory via RabbitMq, localhost as the service name
+var factory = new ConnectionFactory { HostName = "localhost" };
+
+// create a connection and channel
+using (var connection = factory.CreateConnection())
+using (var channel = connection.CreateModel())
+{
+	// get the name of the event (Generic) by using Reflection, 
+    var eventName = @event.GetType().Name;
+
+	// declar/create a queue
+    channel.QueueDeclare(eventName, false, false, false, null);
+
+	// convert message to json and encode as bytes(blob)
+    var message = JsonConvert.SerializeObject(@event);
+    var body = Encoding.UTF8.GetBytes(message);
+
+	// publish message
+    channel.BasicPublish("", eventName, null, body);
+}
+
