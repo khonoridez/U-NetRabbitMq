@@ -1,0 +1,28 @@
+﻿
+++ /Microservices/Banking/Domain/MicroRabbit.Banking.Domain
+
+1. Create folders: 
+- CommandHandlers
+- Commands
+- EventHandlers
+- Events
+- Interfaces
+- Models
+
+2. Create Account Model
+\MicroRabbit.Banking.Domain\Models\Account.cs
+!! for example purposes only (not encapsulated may need refactoring)
+
+public class Account
+{
+    public int Id { get; set; }
+    public string AccountType { get; set; }
+    public decimal AccountBalance { get; set; }
+}
+
+3. Create IAccountRepository
+\MicroRabbit.Banking.Domain\Interfaces\IAccountRepository.cs
+public interface IAccountRepository
+{
+    IEnumerable<Account> GetAccounts();
+}

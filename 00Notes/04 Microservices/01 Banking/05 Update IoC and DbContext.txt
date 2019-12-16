@@ -1,0 +1,8 @@
+﻿
+1. Add project reference to MicroRabbit.Infra.IoC
+- MicroRabbit.Banking.Application
+- MicroRabbit.Banking.Data
+- MicroRabbit.Banking.Domain
+- MicroRabbit.Banking.Core
+- MicroRabbit.Infra.Bus
+
