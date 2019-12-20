@@ -1,0 +1,27 @@
+﻿
+++ /Microservices/Banking/Data/MicroRabbit.Banking.Data
+
+1. Install packages
+- Microsoft.EntityFrameworkCore 3.1.0
+- Microsoft.EntityFrameworkCore.Design 3.1.0
+
+2. Create folders
+- Context
+- Repository
+
+3. Create Db Context
+\MicroRabbit.Banking.Data\Context\BankingDbContext.cs
+public class BankingDbContext : DbContext
+
+4. Create Repository
+\MicroRabbit.Banking.Data\Repository\AccountRepository.cs
+
+4.1 Inject DbContext
+private readonly BankingDbContext _ctx;
+
+public AccountRepository(BankingDbContext ctx)
+{
+    _ctx = ctx;
+}
+
+4.2 Implement IEnumerable<Account> GetAccounts()

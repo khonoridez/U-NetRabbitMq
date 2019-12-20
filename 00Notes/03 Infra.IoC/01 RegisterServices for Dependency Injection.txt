@@ -1,0 +1,36 @@
+﻿
+1. Create Project
+Infra.IoC/MicroRabbit.Infra.IoC
+-.Net Core Class Library
+
+2. Install Dependency Injection
+Microsoft.Extensions.DependencyInjection
+
+3. Create DependencyContainer.cs
+public class DependencyContainer
+{
+    public static void RegisterServices(IServiceCollection services)
+    {
+        services.AddTransient<IEventBus, RabbitMQBus>();
+    }
+}
+
+++ Project reference of MicroRabbit.Infra.IoC
+- MicroRabbit.Banking.Application
+- MicroRabbit.Banking.Data
+- MicroRabbit.Banking.Domain
+- MicroRabbit.Banking.Core
+- MicroRabbit.Infra.Bus
+
+public static void RegisterServices(IServiceCollection services)
+{
+    // Domain Bus
+    services.AddTransient<IEventBus, RabbitMQBus>();
+
+    // Application Services
+    services.AddTransient<IAccountService, AccountService>();
+
+    // Data
+    services.AddTransient<IAccountRepository, AccountRepository>();
+    services.AddTransient<BankingDbContext>();
+}

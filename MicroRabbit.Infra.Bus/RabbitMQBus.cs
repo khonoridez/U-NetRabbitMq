@@ -65,6 +65,8 @@ namespace MicroRabbit.Infra.Bus
                 throw new ArgumentException($"Handler Type {handlerType.Name} already registered for '{eventName}'",
                     nameof(handlerType));
 
+            _handlers[eventName].Add(handlerType);
+
             StartBasicConsume<T>();
         }
 
@@ -108,7 +110,6 @@ namespace MicroRabbit.Infra.Bus
             if (_handlers.ContainsKey(eventName))
             {
                 var subscriptions = _handlers[eventName];
-
                 foreach (var subscription in subscriptions)
                 {
                     var handler = Activator.CreateInstance(subscription);

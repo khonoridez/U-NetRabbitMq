@@ -1,0 +1,28 @@
+﻿
+++ /Microservices/Banking/Application/MicroRabbit.Banking.Application
+
+1. Create folders
+- Interfaces
+- Services
+
+2. Create IAcccountService Interface
+public interface IAccountService
+{
+    IEnumerable<Account> GetAccounts();
+}
+
+3. Create AccountService
+- Inject IAccountRepository
+
+public class AccountService : IAccountService
+{
+    private readonly IAccountRepository _accountRepository;
+
+    public AccountService(IAccountRepository accountRepository)
+    {
+        _accountRepository = accountRepository;
+    }
+
+    public IEnumerable<Account> GetAccounts() => _accountRepository.GetAccounts();
+}
+

@@ -1,0 +1,88 @@
+﻿++ MicroRabbit.Banking.Api
+
+1. Set Start up Project > 
+/Microservices/Banking/Api/MicroRabbit.Banking.Api
+
+2. Switch Visual Studio Run Profile from IIS Express to MicroRabbit.Banking.Api
+
+3. Modify appsettings.json add ConnectionString
+"ConnectionStrings": {
+    "BankingDbConnection": "Server=localhost;Database=BankingDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+
+4. Modify Startup.cs
+- Call RegisterServices from MicroRabbit.Infra.IoC;
+- Create UseSqlServer
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext<BankingDbContext>(options =>
+    {
+        options.UseSqlServer(Configuration.GetConnectionString("BankingDbConnection"));
+    });
+
+    services.AddControllers();
+
+    RegisterServices(services);
+}
+
+private void RegisterServices(IServiceCollection services)
+{
+    DependencyContainer.RegisterServices(services);
+}
+
+5. Add Db Migration, update database
+- Under Package Manage Console, Switch Default Project to /MicroRabbit.Banking.Data (Project containing DbContext)
+
+> Add-Migration "Initial Migration" -Context BankingDbContext
+> Update-Database -Context BankingDbContext
+
+!! See errors
+
+6. Install MediatR to MicroRabbit.Banking.Api
+MediatR 7.0.0
+MediatR.Extensions.Microsoft.DependencyInjection 7.0.0
+
+++ Swagger/MediatR
+
+1. Install package to MicroRabbit.Banking.Api
+> Swashbuckle.AspNetCore.Swagger 4.0.1
+
+2. Add Swagger to services
+services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Info { Title = "Banking Microservice", Version = "v1" });
+});
+
+services.AddMediatR(typeof(Startup));
+
+!! see errors
+
+++ BankingController
+
+1. Create Controller BankingController
+
+2. Inject IAccountService
+private readonly IAccountService _accountService;
+
+public BankingController(IAccountService accountService)
+{
+    _accountService = accountService;
+}
+
+3. Configure basic Get Api
+[HttpGet]
+public ActionResult<IEnumerable<Account>> Get()
+{
+    return Ok(_accountService.GetAccounts());
+}
+
+++ Seed data
+
+insert into Accounts (AccountType, AccountBalance)
+values ('Checking', '0.00')
+insert into Accounts (AccountType, AccountBalance)
+values ('Savings', '0.00')
+
+4. Run Api
+
+!! See errors
