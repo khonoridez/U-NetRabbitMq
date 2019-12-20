@@ -13,3 +13,8 @@ Unable to create an object of type 'BankingDbContext'. For the different pattern
 
 > Add MediatR.Extensions.Microsoft.DependencyInjection 7.0.0 to Infra.Bus/MicroRabbit.Infra.Bus
 
+3. Swagger package error
+> Add Swashbuckle.AspNetCore 4.0.1 to MicroRabbit.Banking.Api
+
+4. 
+

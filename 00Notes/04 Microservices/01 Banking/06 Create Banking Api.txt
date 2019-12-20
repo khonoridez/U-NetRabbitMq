@@ -38,3 +38,21 @@ private void RegisterServices(IServiceCollection services)
 
 !! See errors
 
+6. Install MediatR to MicroRabbit.Banking.Api
+MediatR 7.0.0
+MediatR.Extensions.Microsoft.DependencyInjection 7.0.0
+
+++ Swagger
+
+1. Install package to MicroRabbit.Banking.Api
+> Swashbuckle.AspNetCore.Swagger 4.0.1
+
+2. Add Swagger to services
+services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Info { Title = "Banking Microservice", Version = "v1" });
+});
+
+services.AddMediatR(typeof(Startup));
+
+!! see errors
