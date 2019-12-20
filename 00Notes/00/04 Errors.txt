@@ -1,0 +1,15 @@
+﻿
+1. EF Migration Error
+Your startup project 'MicroRabbit.Banking.Api' doesn't reference Microsoft.EntityFrameworkCore.Design. 
+This package is required for the Entity Framework Core Tools to work. Ensure your startup project is correct, install the package, and try again.
+
+> Add Microsoft.EntityFrameworkCore.Design 3.0.0 to Microservices/Banking/Api/MicroRabbit.Banking.Api
+
+2. EF Migration Error
+An error occurred while accessing the Microsoft.Extensions.Hosting services. Continuing without the application service provider. Error: Some services are not able to be constructed 
+(Error while validating the service descriptor 'ServiceType: MicroRabbit.Domain.Core.Bus.IEventBus Lifetime: Transient ImplementationType: MicroRabbit.Infra.Bus.RabbitMQBus': Unable to 
+resolve service for type 'MediatR.IMediator' while attempting to activate 'MicroRabbit.Infra.Bus.RabbitMQBus'.)
+Unable to create an object of type 'BankingDbContext'. For the different patterns supported at design time, see https://go.microsoft.com/fwlink/?linkid=851728
+
+> Add MediatR.Extensions.Microsoft.DependencyInjection 7.0.0 to Infra.Bus/MicroRabbit.Infra.Bus
+

@@ -1,0 +1,40 @@
+﻿++ MicroRabbit.Banking.Api
+
+1. Set Start up Project > 
+/Microservices/Banking/Api/MicroRabbit.Banking.Api
+
+2. Switch Visual Studio Run Profile from IIS Express to MicroRabbit.Banking.Api
+
+3. Modify appsettings.json add ConnectionString
+"ConnectionStrings": {
+    "BankingDbConnection": "Server=localhost;Database=BankingDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+
+4. Modify Startup.cs
+- Call RegisterServices from MicroRabbit.Infra.IoC;
+- Create UseSqlServer
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext<BankingDbContext>(options =>
+    {
+        options.UseSqlServer(Configuration.GetConnectionString("BankingDbConnection"));
+    });
+
+    services.AddControllers();
+
+    RegisterServices(services);
+}
+
+private void RegisterServices(IServiceCollection services)
+{
+    DependencyContainer.RegisterServices(services);
+}
+
+5. Add Db Migration, update database
+- Under Package Manage Console, Switch Default Project to /MicroRabbit.Banking.Data (Project containing DbContext)
+
+> Add-Migration "Initial Migration" -Context BankingDbContext
+> Update-Database -Context BankingDbContext
+
+!! See errors
+
