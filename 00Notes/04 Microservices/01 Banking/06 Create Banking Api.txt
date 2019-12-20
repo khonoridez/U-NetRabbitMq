@@ -42,7 +42,7 @@ private void RegisterServices(IServiceCollection services)
 MediatR 7.0.0
 MediatR.Extensions.Microsoft.DependencyInjection 7.0.0
 
-++ Swagger
+++ Swagger/MediatR
 
 1. Install package to MicroRabbit.Banking.Api
 > Swashbuckle.AspNetCore.Swagger 4.0.1
@@ -56,3 +56,33 @@ services.AddSwaggerGen(c =>
 services.AddMediatR(typeof(Startup));
 
 !! see errors
+
+++ BankingController
+
+1. Create Controller BankingController
+
+2. Inject IAccountService
+private readonly IAccountService _accountService;
+
+public BankingController(IAccountService accountService)
+{
+    _accountService = accountService;
+}
+
+3. Configure basic Get Api
+[HttpGet]
+public ActionResult<IEnumerable<Account>> Get()
+{
+    return Ok(_accountService.GetAccounts());
+}
+
+++ Seed data
+
+insert into Accounts (AccountType, AccountBalance)
+values ('Checking', '0.00')
+insert into Accounts (AccountType, AccountBalance)
+values ('Savings', '0.00')
+
+4. Run Api
+
+!! See errors
