@@ -1,0 +1,166 @@
+﻿++ RabbitMq
+
+++ Prepare Endpoint
+1. Create new Action in BankingController.cs
+Microservices/Banking/Api//MicroRabbit.Banking.Api
+[HttpPost]
+public ActionResult<IEnumerable<Account>> Post([FromBody] AccountTransfer accountTransfer)
+{
+    return Ok(accountTransfer);
+}
+
+public class AccountTransfer
+{
+    public int FromAccount { get; set; }
+    public int ToAccount { get; set; }
+    public decimal TransferAmount { get; set; }
+}
+
+2.  Create method in IAccountService
+/Application/MicroRabbit.Banking.Application
+// IAccountService.cs
+public interface IAccountService
+{
+    ...
+    void Transfer(AccountTransfer accountTransfer);
+}
+
+++ Transfer Command
+- Customer Logins
+- Initiates a transfer
+- Command sends to the bus from service
+- Handled in Command Handler publishes event to RabbitMq
+
+1. Create abstract base class TransferCommand.cs
+/Domain/MicroRabbit.Banking.Domain/Commands/
+public abstract class TransferCommand : Command
+{
+    public int From { get; protected set; }
+    public int To { get; protected set; }
+    public decimal Amount { get; protected set; }
+}
+
+2. Create concrete class CreateTransferCommand
+/Domain/MicroRabbit.Banking.Domain/Commands/
+
+public class CreateTransferCommand : TransferCommand
+{
+    public CreateTransferCommand(int from, int to, decimal amount)
+    {
+        From = from;
+        To = to;
+        Amount = amount;
+    }
+}
+
+3. Create handler TransferCommandHandler(MediatR) for CreateTransferCommand
+/Domain/MicroRabbit.Banking.Domain/CommandHandler/
+
+public class TransferCommandHandler : IRequestHandler<CreateTransferCommand, bool>
+{
+    private readonly IEventBus _bus;
+
+    public TransferCommandHandler(IEventBus bus)
+    {
+        _bus = bus;
+    }
+
+    public Task<bool> Handle(CreateTransferCommand request, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(true);
+    }
+}
+
+4. Modify Transfer Method in AccountService.cs
+/Microservices/Banking/Application/MicroRabbit.Banking.Application/Services
+
+4.1 Inject IEventBus
+
+...
+private readonly IEventBus _bus;
+
+public AccountService(IAccountRepository accountRepository, IEventBus bus)
+{
+    ...
+    _bus = bus;
+}
+
+4.2 Configure Transfer method to send to Event Bus
+- Use Bus to send message where we have various Handlers that listens to these message types (e.g CreateTransferCommand)
+- The handler (TransferCommandHandler) processes in Handle method (e.g. save to db, logging)
+- Publish the event to RabbitMq
+
+public void Transfer(AccountTransfer accountTransfer)
+{
+    var createTransferCommand = new CreateTransferCommand(
+        accountTransfer.FromAccount,
+        accountTransfer.ToAccount,
+        accountTransfer.TransferAmount);
+
+    _bus.SendCommand(createTransferCommand);
+}
+
+
+5. Create Event TransferCreatedEvent.cs
+- Where the Command is called CreateTransferCommand and Event is TransferCreatedEvent
+- 
+Microservices/Banking/Domain/MicroRabbit.Banking.Domain/Events
+
+using MicroRabbit.Domain.Core.Events;
+public class TransferCreatedEvent : Event
+{
+    public TransferCreatedEvent(int from, int to, decimal amount)
+    {
+        From = from;
+        To = to;
+        Amount = amount;
+    }
+
+    public int From { get; private set; }
+    public int To { get; private set; }
+    public decimal Amount { get; private set; }
+}
+
+6. Publish Event in TransferCommandHandler's Transfer method
+public Task<bool> Handle(CreateTransferCommand request, CancellationToken cancellationToken)
+{
+    _bus.Publish(new TransferCreatedEvent(
+        request.From,
+        request.To,
+        request.Amount
+        ));
+
+    return Task.FromResult(true);
+}
+
+7. Call service in Controller
+[HttpPost]
+public ActionResult<IEnumerable<Account>> Post([FromBody] AccountTransfer accountTransfer)
+{
+    _accountService.Transfer(accountTransfer);
+    return Ok(accountTransfer);
+}
+
+8. Configure IoC
+/MicroRabbit.Infra.IoC/DependencyContainer.cs
+
+public class DependencyContainer
+{
+    public static void RegisterServices(IServiceCollection services)
+    {
+        // Domain Bus
+        services.AddTransient<IEventBus, RabbitMQBus>();
+
+        // Domain Banking Commands
+        services.AddTransient<IRequestHandler<CreateTransferCommand, bool>, TransferCommandHandler>();
+
+        // Application Services
+        services.AddTransient<IAccountService, AccountService>();
+
+        // Data
+        services.AddTransient<IAccountRepository, AccountRepository>();
+        services.AddTransient<BankingDbContext>();
+    }
+}
+
+9. Test Api

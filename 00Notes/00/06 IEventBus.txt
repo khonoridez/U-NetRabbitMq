@@ -1,0 +1,37 @@
+﻿
++++ IEventBus details
+- 
+Domain/MicroRabbit.Domain.Core/Bus/IEventBus.cs
+
+public interface IEventBus
+{
+    Task SendCommand<T>(T command) where T : Command;
+    void Publish<T>(T @event) where T : Event;
+    void Subscribe<T, TH>()
+        where T : Event
+        where TH : IEventHandler<T>;
+}
+
+
++++ Send Command
+
+1. Triggers Send Command of Type Command
+> Task SendCommand<T>(T command) where T : Command;
+
+public abstract class Command : Message
+{
+    public DateTime Timestamp { get; protected set; }
+
+    protected Command() => Timestamp = DateTime.Now;
+}
+
+2. Command base class inherits from Message base class (MediatR pattern)
+public abstract class Message : IRequest<bool>
+{
+    public string MessageType { get; protected set; }
+
+    protected Message() => MessageType = GetType().Name;
+}
+
+3. Message inherits from IRequest of bool from MediatR
+
