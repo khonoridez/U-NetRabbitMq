@@ -37,7 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroRabbit.Banking.Data", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroRabbit.Banking.Domain", "MicroRabbit.Banking.Domain\MicroRabbit.Banking.Domain.csproj", "{6B529AB5-02F3-4994-A397-E5DFB9CD7C12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroRabbit.Banking.Api", "MicroRabbit.Banking.Api\MicroRabbit.Banking.Api.csproj", "{89FB3544-293C-41FB-9C5F-B8E3D25FDC21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroRabbit.Banking.Api", "MicroRabbit.Banking.Api\MicroRabbit.Banking.Api.csproj", "{89FB3544-293C-41FB-9C5F-B8E3D25FDC21}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00Documentation", "00Documentation", "{DBEF6D7F-18F1-4A5B-8114-454507102318}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,6 +84,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{049A61FA-0D97-476C-9F9B-9EE2F122CADF} = {DBEF6D7F-18F1-4A5B-8114-454507102318}
 		{EA759F4B-6CAC-4518-8608-151452E2C7EC} = {6C78E8A1-7572-45DF-9A7D-8F1E44FFC49F}
 		{5C621E40-DF9E-4FEA-8467-7102C849E540} = {0E30A4B0-E61A-4D3D-A26B-6263297D75A7}
 		{D04B40A2-E63D-4508-8A01-1EB1BFDCB200} = {CECAFCA5-3A46-454E-9024-5A091449BEBF}

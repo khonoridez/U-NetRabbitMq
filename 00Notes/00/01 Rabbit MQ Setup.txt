@@ -15,6 +15,9 @@ https://www.rabbitmq.com/install-windows.html#run-windows
 guest / guest
 
 ++++ Commands
+!Run in RabbitMQ Command Prompt
+!Restart RabbitMQ Service (services.msc)
+
 https://www.rabbitmq.com/rabbitmqctl.8.html
 
 Stop app
@@ -32,3 +35,29 @@ Set Read and Write for everything
 
 Reset / Clear server
 > rabbitmqctl reset
+
+Enable Management UI (Adminstrator dashboard)
+> rabbitmq-plugins enable rabbitmq_management
+
+
+++++ UI
+http://localhost:15672/
+
+1. Overview Tab
+- Modify chart
+- Connections, Channels, Exchanges, Queues
+- Cluster: running on machine
+- User
+- Memory, Disk space, etc
+- Channel and Queue operations
+- Export/Import definitions: port to another server with same exact defintion
+
+2. Connections Tab
+
+3. Channels Tab
+4. Queues Tab
+https://www.tutlane.com/tutorial/rabbitmq/rabbitmq-exchanges
+- Direct exhcange (key map to Queue)
+- Fanout
+
+5. Admin tab

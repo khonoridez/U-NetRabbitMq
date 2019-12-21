@@ -1,0 +1,84 @@
+﻿+++ Solution Folders
+
+1. Domain
+2. Infra.Bus
+3. Infra.IoC
+4. Microservices
+5. Presentation
+
++++ Api Call Flow
+
+Ensure RabbitMq service is running
+http://localhost:15672/
+test / test
+guest / guest
+
+ex. Banking Api
+1. Trigger Api
+Microservices/Banking/Api/MicroRabbit.Banking.Api
+/Controllers/BankingController.cs
+
+> _accountService.Transfer(accountTransfer);
+
+2. triggers Transfer method in AccountService passing through RabbitMq SendCommand
+Microservices/Banking/MicroRabbit.Banking.Application
+/Services/AccountService.cs
+
+> var createTransferCommand = new CreateTransferCommand(
+                accountTransfer.FromAccount,
+                accountTransfer.ToAccount,
+                accountTransfer.TransferAmount);
+> _bus.SendCommand(createTransferCommand);
+
+2.1 RabbitMQBus
+public Task SendCommand<T>(T command) where T : Command
+{
+    return _mediator.Send(command);
+}
+
+2.2 Under Infra.IoC
+Infra.IoC/MicroRabbit.Infra.IoC/DependencyContainer.cs
+- IEventBus will implement RabbitMQBus
+- IRequestHandler<CreateTransferCommand, bool> will implement TransferCommandHandler
+- IRequestHandler from MediatR
+> services.AddTransient<IEventBus, RabbitMQBus>();
+> services.AddTransient<IRequestHandler<CreateTransferCommand, bool>, TransferCommandHandler>();
+
+3. TransferCommandHandler.cs
+- Microservices/Banking/Domain/MicroRabbit.Banking.Domain
+- /CommandHandlers/TransferCommandHandler.cs
+- Gets trigger based on SendCommand type of T (MediatR)
+...
+public Task<bool> Handle(CreateTransferCommand request, CancellationToken cancellationToken)
+{
+    _bus.Publish(new TransferCreatedEvent(
+        request.From,
+        request.To,
+        request.Amount
+        ));
+
+    return Task.FromResult(true);
+}
+
+4. Triggers Publish method of concrete class of IEventBus which is RabbitMQBus
+- Domain/MicroRabbit.Domain.Core/Bus/IEventBus.cs
+- Infra.Bus/MicroRabbit.Infra.Bus/RabbitMQBus.cs
+- Sends message to RabbitMq
+
+public void Publish<T>(T @event) where T : Event
+{
+    var factory = new ConnectionFactory { HostName = "localhost" };
+    using (var connection = factory.CreateConnection())
+    using (var channel = connection.CreateModel())
+    {
+        var eventName = @event.GetType().Name;
+
+        channel.QueueDeclare(eventName, false, false, false, null);
+
+        var message = JsonConvert.SerializeObject(@event);
+        var body = Encoding.UTF8.GetBytes(message);
+
+        channel.BasicPublish("", eventName, null, body);
+    }
+}
+

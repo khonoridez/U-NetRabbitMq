@@ -1,0 +1,86 @@
+﻿
++++ MediatR Flow
+https://blogs.msdn.microsoft.com/cdndevs/2016/01/26/simplifying-development-and-separating-concerns-with-mediatr/
+1. Create Object that will represent work that we need done:
+public class AddEmergencyContactCommand : IRequest
+{
+    public AddEmergencyContactViewModel Contact { get; set; }
+    public string UserId { get; set; }
+}
+
+// IRequest interface – which is just a marker for location – and has a few properties on it. 
+// The properties are the payload so that you you can pass everything that is needed to the mediator in one shot.
+
+// In this solution these are classes that inherits base class Message.cs
+Domain//MicroRabbit.Domain.Core.Events/Events/Message.cs
+
+public abstract class Message : IRequest<bool>
+{
+    ...
+}
+
+2. Create handler for the request
+public class AddEmergencyContactHandler : RequestHandler<AddEmergencyContactCommand>
+{
+    private readonly ApplicationDbContext _context;
+    public AddEmergencyContactHandler(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    protected override void HandleCore(AddEmergencyContactCommand message)
+    {
+        // create my new object, add it to the database, etc.
+        // ...
+
+        _context.SaveChanges();
+    }
+}
+
+// inherits from RequestHandler<T> and MediatR makes sure it gets invoked with the correct payload (T). 
+// handler itself can have its own dependencies. 
+
+
+// In this solution theses are concrete Handlers per Microservice
+// ex. Microservices/Banking/Domain/MicroRabbit.Banking.Domain/CommandHandlers/TransferCommandHandler.cs
+public class TransferCommandHandler : IRequestHandler<CreateTransferCommand, bool>
+{
+    ...
+
+    public Task<bool> Handle(CreateTransferCommand request, CancellationToken cancellationToken)
+    {
+        ...
+    }
+}
+
+3. Use in Controller Actions
+[HttpPost]
+public IActionResult AddEmergencyContact(AddEmergencyContactViewModel model)
+{
+    if (ModelState.IsValid)
+    {
+        model.EmergencyContactId = Guid.NewGuid();
+        _mediator.Send(new AddEmergencyContactCommand { Contact = model, UserId = User.GetUserId()});
+        return RedirectToAction("Index");
+    }
+    return View(model);
+}
+
+// validate the state of my object, put it on the bus with the requisite information and finally send the command along its way.
+// note that I’m following the PRG pattern here, helping to prevent duplicate form submissions by sending the user back to a different page.
+
+// In this solution it is in the concrete service implemenation
+// ex. Microservices/Banking/Application/MicroRabbit.Banking.Application/Services/AccountService.cs
+public void Transfer(AccountTransfer accountTransfer)
+{
+    ...
+    _bus.SendCommand(createTransferCommand);
+}
+
+.. To the concrete implementation of IEventBus
+Infra.Bus/MicroRabbit.Infra.Bus/RabbitMQBus.cs
+...
+public Task SendCommand<T>(T command) where T : Command
+{
+    return _mediator.Send(command);
+}
