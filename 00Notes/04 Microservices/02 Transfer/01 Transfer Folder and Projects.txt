@@ -3,9 +3,19 @@
 1.1 Api
 1.2 Application
 Application services, interfaces
+
+-- Create folders
+- Interfaces
+- Models
+- Services
+
 1.3 Domain
 - Core models for Banking
 1.4 Data
+- Create folders
+-- Context
+-- Migrations
+-- Repository
 
 ++ Setup projects
 1. /Api/MicroRabbit.Transfer.Api
@@ -18,3 +28,11 @@ Application services, interfaces
 - .Net Core Class Library
 
 4. /Domain/MicroRabbit.Transfer.Domain
+- Create folders
+-- CommandHandlers
+-- Commands
+-- EventHandlers
+-- Events
+-- Interfaces
+-- Models
+
