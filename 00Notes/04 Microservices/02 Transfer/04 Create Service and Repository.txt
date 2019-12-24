@@ -62,3 +62,10 @@ public static void RegisterServices(IServiceCollection services)
     services.AddTransient<TransferDbContext>();
     ...
 }
+
+
+++ Seed Transfer Data (Manual)
+- Run in Sql Server
+
+insert into TransferLogs (FromAccount, ToAccount, TransferAmount) values (1, 2, '5.10');
+insert into TransferLogs (FromAccount, ToAccount, TransferAmount) values (2, 1, '15.20');
