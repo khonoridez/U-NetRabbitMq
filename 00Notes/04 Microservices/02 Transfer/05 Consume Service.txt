@@ -1,0 +1,23 @@
+﻿
+++ Configure Controller
+
+1. Transfer/Api/MicroRabbit.Transfer.Api/Controller/TransferController.cs
+[Route("api/[controller]")]
+[ApiController]
+public class TransferController : Controller
+{
+    private readonly ITransferService _transferService;
+
+    public TransferController(ITransferService transferService)
+    {
+        _transferService = transferService;
+    }
+
+    [HttpGet]
+    public ActionResult<IEnumerable<TransferLog>> Get()
+    {
+        return Ok(_transferService.GetTransferLogs());
+    }
+}
+
+2. Test in Swagger
