@@ -7,3 +7,9 @@ Transient lifetime services (AddTransient) are created each time they're request
 
 Scoped
 Scoped lifetime services (AddScoped) are created once per client request (connection).
+
+
++++ Set Multiple Startup Projects in Visual Studio
+1. Right click Solution > Set startup projects
+- Banking Api: Start without debug
+- Transfer Api: Start
