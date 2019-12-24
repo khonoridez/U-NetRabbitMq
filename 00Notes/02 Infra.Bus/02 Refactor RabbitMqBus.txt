@@ -1,0 +1,58 @@
+﻿
+++ Refactor RabbitMQBus
+
+ex. ProcessEvent
+var handler = Activator.CreateInstance(subscription);
+
+- We are using Event Handler type to create an instance
+- This requires our EventHandler to have a parameterless constructor 
+(e.g MicroRabbit.Transfer.Domain/EventHandlers/TransferEventHandler.cs was able to create an instance because of parameterless constructor)
+...
+public class TransferEventHandler : IEventHandler<TransferCreatedEvent>
+{
+    public TransferEventHandler()
+    {
+    }
+    ...
+
+! Refactor so as we do not require a parameterless constructor
+
+1. Add package
+- Microsoft.Extensions.DependencyInjection 3.1.0
+
+2. Inject IServiceScopeFactory in RabbitMQBus.cs
+...
+private readonly IServiceScopeFactory _serviceScopeFactory;
+...
+
+public RabbitMQBus(IMediator mediator, IServiceScopeFactory serviceScopeFactory)
+{
+    ...
+    _serviceScopeFactory = serviceScopeFactory;
+    ...
+}
+
+3. Modify ProcessEvent method to use _serviceScopeFactory
+- This is the same method we used in Transfer Service Api to Subscribe
+- var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>(); // from Microsoft.Extensions.DependencyInjection
+...
+using (var scope = _serviceScopeFactory.CreateScope())
+{
+    ...
+    foreach (var subscription in subscriptions)
+    {
+        var handler = scope.ServiceProvider.GetRequiredService(subscription);
+        ...
+
+4. Modify IoC to configure the injected IServiceScopeFactory in constructor
+- Replace with Singleton and pass a new instance of RabbitMqBus
+- Pass scopeFactory (IServiceScopeFactory) to insstance of RabbitMqBus
+
+services.AddSingleton<IEventBus, RabbitMQBus>(sp =>
+{
+    var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+    return new RabbitMQBus(sp.GetService<IMediator>(), scopeFactory);
+});
+
+5. Add TransferEventHandler in IoC
+services.AddTransient<TransferEventHandler>();
