@@ -1,0 +1,48 @@
+﻿
+++ Create Transfer Service
+
+1. Create Interface, ITransferService.cs
+Microservices/Transfer/Application/MicroRabbit.Transfer.Application/InterfacesInterfaces
+
+public interface ITransferService
+{
+    IEnumerable<TransferLog> GetTransferLogs();
+}
+
+2. Create concrete implementation of ITransferService
+../MicroRabbit.Transfer.Application/Services/TransferService.cs
+
+private readonly ITransferRepository _transferRepository;
+private readonly IEventBus _bus;
+
+public TransferService(ITransferRepository transferRepository, IEventBus bus)
+{
+    _transferRepository = transferRepository;
+    _bus = bus;
+}
+
+public IEnumerable<TransferLog> GetTransferLogs() => ...
+
+2.1 Create ITransferRepository.cs
+../Domain/MicroRabbit.Transfer.Domain/Interfaces/ITransferRepository.cs
+
+public interface ITransferRepository
+{
+    IEnumerable<TransferLog> GetTransferLogs();
+}
+
+2.2 Create concrete repository TransferRepository
+../Data/MicroRabbit.Transfer.Data/Repository/TransferRepository.cs
+
+public class TransferRepository : ITransferRepository
+{
+    private readonly TransferDbContext _ctx;
+
+    public TransferRepository(TransferDbContext ctx)
+    {
+        _ctx = ctx;
+    }
+
+    public IEnumerable<TransferLog> GetTransferLogs() => _ctx.TransferLogs;
+}
+
