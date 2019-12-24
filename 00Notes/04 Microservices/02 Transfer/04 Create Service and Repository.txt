@@ -46,3 +46,19 @@ public class TransferRepository : ITransferRepository
     public IEnumerable<TransferLog> GetTransferLogs() => _ctx.TransferLogs;
 }
 
+
+3. Update IoC
+Infra.IoC/MicroRabbit.Infra.IoC/DependencyContainer.cs
+
+public static void RegisterServices(IServiceCollection services)
+{
+    ...
+    // Application Services
+    services.AddTransient<ITransferService, TransferService>();
+
+    // Data
+    services.AddTransient<ITransferRepository, TransferRepository>();
+
+    services.AddTransient<TransferDbContext>();
+    ...
+}

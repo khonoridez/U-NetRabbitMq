@@ -44,3 +44,6 @@ https://stackoverflow.com/questions/53037126/using-apicontrollerattribute-withou
 6. Error with NetCore version mismatch 3.0 vs 3.1
 Resolution: All projects are temporarily in 3.0
 
+7. Severity	Code	Description	Project	File	Line	Suppression State
+Error Project '....' targets 'netcoreapp3.1'. It cannot be referenced by a project that targets '.NETCoreApp,Version=v3.0'.	
+Resolution: Update Projects to NetCore 3.1 (API) and NetStandard 2.1 (Class Libraries)
