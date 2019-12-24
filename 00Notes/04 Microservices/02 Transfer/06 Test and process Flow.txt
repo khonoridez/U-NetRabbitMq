@@ -1,0 +1,100 @@
+﻿
+++ Test
+
+Message Sender (Banking Api) --> RabbitMq Server --> Message Receiver (Transfer Api)
+
+++ Set Breakpoints
+
+1. Infra.Bus/MicroRabbit.Infra.Bus/RabbitMQBus.cs
+- Publish
+- SendCommand
+- Subscribe
+- StartBasicConsume
+- Consumer_Received
+- ProcessEvent
+
+2. Microservices/Transfer/Domain/MicroRabbit.Transfer.Domain/EventHandlers/TransferEventHandler.cs
+- Handle
+
+! Check if this Handle is being Invoked in RabbitMq 
+- (As per generic ProcessEvent method in RabbitMQBus.cs)
+// await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+
+3. Microservices/Banking/Api/MicroRabbit.Banking.Api/Controllers/BankingController.cs
+- Post
+
+! Perform an Account Transfer
+
+4. Microservices/Banking/Application/MicroRabbit.Banking.Application/Services/AccountService.cs
+- Transfer
+
+! Account Service will initiate a _bus.SendCommand
+
+5. Microservices/Transfer/Domain/MicroRabbit.Banking.Domain/CommandHandlers/TransferCommandHandler.cs
+- Handle
+
+! We do a publish and drop the message to RabbitMq
+
+++ Test 
+1. Clear Queue in RabbitMq interface (Queues Tab)
+http://localhost:15672/
+
+++ Publish to RabbitMq
+- Set Banking Service as Startup, Run
+- Post sample data:
+{
+  "fromAccount": 1,
+  "toAccount": 2,
+  "transferAmount": 10.50
+}
+- Trace via breakpoints:
+
+1. BankingController
+- Post
+2. AccountService
+- Transfer
+3. RabbitMQBus
+- SendCommand
+4. TransferCommandHandler
+- Handle
+5. RabbitMQBus
+- Publish
+6. Verify "TransferCreatedEvent" queue in RabbitMq has a pending message
+
+
+++ Consume (via Subscribe) Queue from RabbitMq:
+
+- Run Transfer Api (Right click > debug > Start new instance)
+- Trace via breakpoints:
+
+1. RabbitMQBus
+- Subscribe
+// this is because in Startup.cs we configured to Subscribe in a type of Event (TransferCreatedEvent)
+2. RabbitMQBus
+- StartBasicConsume
+// var consumer = new AsyncEventingBasicConsumer(channel);
+// consumer.Received += Consumer_Received;
+// Listens for all type of that Event
+
+3. Finishes Scubscribe in Startup.cs
+
+3. RabbitMQBus
+- Consumer_Received
+
+4. RabbitMQBus
+- ProcessEvent
+// await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
+// Invokes the Handle method
+
+5. TransferEventHandler (Transfer Microservice)
+- Handle
+
+public Task Handle(TransferCreatedEvent @event)
+{
+    // We can do additional things here
+    // e.g. Calculations, do actual Transfer, Talk with other Api/Service
+    return Task.CompletedTask;
+}
+
+6. Verify "TransferCreatedEvent" queue's message is consumed in RabbitMq
+
