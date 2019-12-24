@@ -1,0 +1,30 @@
+﻿
+++ Swagger/MediatR
+
+1. Install package to MicroRabbit.Banking.Api
+> Swashbuckle.AspNetCore.Swagger 4.0.1
+
+2. Add Swagger to services
+services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Info { Title = "Banking Microservice", Version = "v1" });
+});
+
+services.AddMediatR(typeof(Startup));
+
+++ Swagger Errors
+
+1. Swagger package error
+Resolution:  Add Swashbuckle.AspNetCore 4.0.1 to MicroRabbit.Banking.Api
+
+2. Swagger Error
+AggregateException: Some services are not able to be constructed (Error while validating the service descriptor 'ServiceType: Swashbuckle.AspNetCore.Swagger.ISwaggerProvider 
+Lifetime: Transient ImplementationType: Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator': Failed to compare two elements in the array.) 
+(Error while validating the service descriptor 'ServiceType: Swashbuckle.AspNetCore.SwaggerGen.ISchemaRegistryFactory Lifetime: Transient ImplementationType: 
+Swashbuckle.AspNetCore.SwaggerGen.SchemaRegistryFactory': Failed to compare two elements in the array.)
+
+https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1259
+https://www.nuget.org/packages/Swashbuckle.AspNetCore/4.0.1?_src=template
+
+Resolution: Upgrade to 5.0.0-rc4
+> Install-Package Swashbuckle.AspNetCore -Version 5.0.0-rc5

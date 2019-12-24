@@ -1,0 +1,29 @@
+﻿
+++ Create DbCcontext and Domain Models
+
+1. Create DbContext TransferDbContext
+public class TransferDbContext : DbContext
+{
+    public TransferDbContext(DbContextOptions options) : base(options)
+    {
+    }
+}
+
+2. Create TransferLog.cs
+Microservices/Transfer/Domain/MicroRabbit.Transfer.Domain/Models/
+
+2.1 Add on DbContext
+public DbSet<TransferLog> TransferLogs { get; set; }
+
+3. Add referencces in Api for DbContext
+using MicroRabbit.Transfer.Data.Context;
+
+++ Add Database Migration
+1. Create Initial Migration
+- under package manager console
+- set default project in package manager console's default project drop down to Transfer.Data
+> Add-Migration "Initial Migration" -Context TransferDbcontext
+
+2. Update database
+> Update-Database -Context TransferDbContext
+- We should now have 2 databases

@@ -1,0 +1,88 @@
+﻿
+++ Configure Controller
+
+1. Transfer/Api/MicroRabbit.Transfer.Api/Controller/TransferController.cs
+[Route("api/[controller]")]
+[ApiController]
+public class TransferController : Controller
+{
+    private readonly ITransferService _transferService;
+
+    public TransferController(ITransferService transferService)
+    {
+        _transferService = transferService;
+    }
+
+    [HttpGet]
+    public ActionResult<IEnumerable<TransferLog>> Get()
+    {
+        return Ok(_transferService.GetTransferLogs());
+    }
+}
+
+2. Test in Swagger
+
+
+++ Configure Event Handler
+
+1. Create Event TransferCreatedEvent
+Microservices/Transfer/Domain/MicroRabbit.Transfer.Domain/Events/TransferCreatedEvent.cs
+(same as TransferCreatedEvent from Banking Microservice)
+
+public class TransferCreatedEvent : Event
+{
+    public TransferCreatedEvent(int from, int to, decimal amount)
+    {
+        From = from;
+        To = to;
+        Amount = amount;
+    }
+
+    public int From { get; private set; }
+    public int To { get; private set; }
+    public decimal Amount { get; private set; }
+}
+
+2. Create TransferEventHandler.cs
+Microservices/Transfer/Domain/MicroRabbit.Transfer.Domain/EventHandlers/TransferEventHandler.cs
+- We can inject, via constructor, bus to send command to other events (Reporting Service, Notification Service)
+
+public class TransferEventHandler : IEventHandler<TransferCreatedEvent>
+{   
+    public TransferEventHandler()
+    {
+    }
+
+    public Task Handle(TransferCreatedEvent @event)
+    {
+        return Task.CompletedTask;
+    }
+}
+
+3. Update Dependency Container
+Infra.IoC/MicroRabbit.Infra.IoC/DependencyContainer.cs
+
+public static void RegisterServices(IServiceCollection services)
+{
+    ...
+    // Domain Events
+    services.AddTransient<IEventHandler<TransferCreatedEvent>, TransferEventHandler>();
+    ...
+}
+
+++ Configure Subscribe
+
+1. Modify Startup
+.../MicroRabbit.Transfer.Api/Startup.cs
+1.1 Create method ConfigureEventBus
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    ...
+    ConfigureEventBus(app);
+}
+
+private void ConfigureEventBus(IApplicationBuilder app)
+{
+    var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+    eventBus.Subscribe<TransferCreatedEvent, TransferEventHandler>();
+}

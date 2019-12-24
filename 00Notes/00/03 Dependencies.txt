@@ -4,17 +4,29 @@
 - /Infra.Bus/MicroRabbit.Infra.Bus
 
 2. MediatR 7.0.0
-- MicroRabbit.Domain.Core
+- /Domain/MicroRabbit.Domain.Core
+- MicroRabbit.Banking.Api
+- MicroRabbit.Transfer.Api
+
+3. MediatR.Extensions.Microsoft.DependencyInjection 7.0.0
+- /Infra.Bus/MicroRabbit.Infra.Bus
+- /Microservices/Banking/Api/MicroRabbit.Banking.Api
+- /Microservices/Transfer/Api/MicroRabbit.Transfer.Api
+
+4. Newtonsoft.Json 12.0.3
 - /Infra.Bus/MicroRabbit.Infra.Bus
 
-3. Newtonsoft.Json 12.0.3
-- /Infra.Bus/MicroRabbit.Infra.Bus
-
-4. Microsoft.Extensions.DependencyInjection 3.1.0
+5. Microsoft.Extensions.DependencyInjection 3.1.0
 - /Infra.IoC/MicroRabbit.Infra.IoC
 
-5. Microsoft.EntityFrameworkCore 3.1.0
+6. Microsoft.EntityFrameworkCore 3.1.0
 Microsoft.EntityFrameworkCore.Design 3.1.0
 Microsoft.EntityFrameworkCore.SqlServer 3.1.0
 Microsoft.EntityFrameworkCore.Tools 3.1.0
+
 - /Microservices/Banking/Data/MicroRabbit.Banking.Data
+- /Microservices/Transfer/Data/MicroRabbit.Transfer.Data
+
+7. Swashbuckle.AspeNetCore 5.0.0-rc5
+- /Microservices/Banking/Api/MicroRabbit.Banking.Api
+- /Microservices/Transfer/Api/MicroRabbit.Transfer.Api

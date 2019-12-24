@@ -1,0 +1,71 @@
+﻿
+++ Create Transfer Service
+
+1. Create Interface, ITransferService.cs
+Microservices/Transfer/Application/MicroRabbit.Transfer.Application/InterfacesInterfaces
+
+public interface ITransferService
+{
+    IEnumerable<TransferLog> GetTransferLogs();
+}
+
+2. Create concrete implementation of ITransferService
+../MicroRabbit.Transfer.Application/Services/TransferService.cs
+
+private readonly ITransferRepository _transferRepository;
+private readonly IEventBus _bus;
+
+public TransferService(ITransferRepository transferRepository, IEventBus bus)
+{
+    _transferRepository = transferRepository;
+    _bus = bus;
+}
+
+public IEnumerable<TransferLog> GetTransferLogs() => ...
+
+2.1 Create ITransferRepository.cs
+../Domain/MicroRabbit.Transfer.Domain/Interfaces/ITransferRepository.cs
+
+public interface ITransferRepository
+{
+    IEnumerable<TransferLog> GetTransferLogs();
+}
+
+2.2 Create concrete repository TransferRepository
+../Data/MicroRabbit.Transfer.Data/Repository/TransferRepository.cs
+
+public class TransferRepository : ITransferRepository
+{
+    private readonly TransferDbContext _ctx;
+
+    public TransferRepository(TransferDbContext ctx)
+    {
+        _ctx = ctx;
+    }
+
+    public IEnumerable<TransferLog> GetTransferLogs() => _ctx.TransferLogs;
+}
+
+
+3. Update IoC
+Infra.IoC/MicroRabbit.Infra.IoC/DependencyContainer.cs
+
+public static void RegisterServices(IServiceCollection services)
+{
+    ...
+    // Application Services
+    services.AddTransient<ITransferService, TransferService>();
+
+    // Data
+    services.AddTransient<ITransferRepository, TransferRepository>();
+
+    services.AddTransient<TransferDbContext>();
+    ...
+}
+
+
+++ Seed Transfer Data (Manual)
+- Run in Sql Server
+
+insert into TransferLogs (FromAccount, ToAccount, TransferAmount) values (1, 2, '5.10');
+insert into TransferLogs (FromAccount, ToAccount, TransferAmount) values (2, 1, '15.20');
