@@ -98,3 +98,27 @@ public Task Handle(TransferCreatedEvent @event)
 
 6. Verify "TransferCreatedEvent" queue's message is consumed in RabbitMq
 
+
+7. After Refactoring RabbitMqBus, we can now inject in TransferEventHandler (e.g. Repository to save to Db)
+private readonly ITransferRepository _tranferRepository;
+
+public TransferEventHandler(ITransferRepository tranferRepository)
+{
+    _tranferRepository = tranferRepository;
+}
+
+public Task Handle(TransferCreatedEvent @event)
+{
+    _tranferRepository.Add(new TransferLog
+    {
+        FromAccount = @event.From,
+        ToAccount = @event.To,
+        TransferAmount = @event.Amount
+    });
+    return Task.CompletedTask;
+}
+
+++ Test
+1. Set multiple startup projects
+2. Check empty queue in RabbitMq
+3. Post data in Banking Api
