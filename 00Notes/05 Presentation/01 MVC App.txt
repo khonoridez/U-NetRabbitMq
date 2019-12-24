@@ -31,3 +31,54 @@ public class TransferDto
     public int ToAccount { get; set; }
     public decimal TransferAmount { get; set; }
 }
+
+
+++ Local "Proxy" Transfer Service, that communicates to Http to the Microservice
+
+1. Create ITransferService interface
+MicroRabbit.MVC/Services/ITransferService.cs
+public interface ITransferService
+{
+    Task Transfer(TransferDto transferDto);
+}
+
+2. Create concrete class TransferService
+...
+public class TransferService : ITransferService
+...
+
+// ViewModel to Dto to the Transfer method, Serialize and pass to Microservice
+2.1 Inject HttpClient
+...
+private readonly HttpClient _apiClient;
+
+public TransferService(HttpClient apiClient)
+{
+    _apiClient = apiClient;
+}
+...
+
+2.2  Implement Transfer method
+// Serialize data as json
+// Post passing uri and content
+// Response as EnsureSuccessStatusCode
+https://stackoverflow.com/questions/21097730/usage-of-ensuresuccessstatuscode-and-handling-of-httprequestexception-it-throws
+- The idiomatic usage of EnsureSuccessStatusCode is to concisely verify success of a request, when you don't want to handle failure cases in any specific way. 
+- This is especially useful when you want to quickly prototype a client.
+
+public async Task Transfer(TransferDto transferDto)
+{
+    var uri = "https://localhost/5001/api/Banking";
+    var transferContent = new StringContent(JsonConvert.SerializeObject(transferDto), Encoding.UTF8, "application/json");
+
+    var response = await _apiClient.PostAsync(uri, transferContent);
+    response.EnsureSuccessStatusCode();
+}
+
+3. Configure Startup.cs
+3.1  Map service, from interface to concrete
+public void ConfigureServices(IServiceCollection services)
+{
+    ...
+    services.AddHttpClient<ITransferService, TransferService>();
+}
