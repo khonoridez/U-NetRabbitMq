@@ -180,3 +180,16 @@ public Task Handle(TransferCreatedEvent @event)
 }
 
 6. Verify "TransferCreatedEvent" queue's message is consumed in RabbitMq
+
+
+!!! Test with Presentation (MVC)
+
+Ensure RabbitMq service is running
+http://localhost:15672/
+test / test
+guest / guest
+
+1. Right click solution Set Startup Projects
+MicroRabbit.MVC - Start
+MicroRabbit.Banking.Api - Start
+MicroRabbit.Tranfer.Api - Start

@@ -82,3 +82,67 @@ public void ConfigureServices(IServiceCollection services)
     ...
     services.AddHttpClient<ITransferService, TransferService>();
 }
+
+
+++ Controller setup
+
+1. Inject ITransferService to HomeController
+...
+private readonly ITransferService _transferService;
+...
+
+public HomeController(ITransferService transferService, ILogger<HomeController> logger)
+{
+    _transferService = transferService;
+    ...
+}
+
+2. Implement Transfer HttpPost method
+// Overall goal is to be able to communicate to our Microservice from the Presentation layer
+
+[HttpPost]
+public async Task<IActionResult> Transfer(TransferViewModel model)
+{
+    TransferDto transferDto = new TransferDto
+    {
+        FromAccount = model.FromAccount,
+        ToAccount = model.ToAccount,
+        TransferAmount = model.TransferAmount
+    };
+
+    await _transferService.Transfer(transferDto);
+
+    return View("Index");
+}
+
+++ View setup
+
+1. Modiify View under Views/Home/Index.cshtml
+<form action="/home/transfer" method="post">
+    <label for="FromAccount">From Account:</label>
+    <input type="text" name="FromAccount" />
+
+    <label for="ToAccount">To Account:</label>
+    <input type="text" name="ToAccount" />
+
+    <label for="TransferAmount">Amount:</label>
+    <input type="text" name="TransferAmount" />
+
+    <input type="submit" name="Transfer" />
+</form>
+
+
+
+++ Test
+!! Ensure RabbitMq is running
+1. Right click solution Set Startup Projects
+MicroRabbit.MVC - Start
+MicroRabbit.Banking.Api - Start
+MicroRabbit.Tranfer.Api - Off
+
+2. Place breakpoints in
+- HomeController.cs/Transfer method
+- TransferService.cs/Transfer method
+- BankingController.cs/Post method
+
+3. Check RabbitMq UI, Queue tab to verify message
