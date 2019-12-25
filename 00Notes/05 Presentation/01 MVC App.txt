@@ -1,0 +1,148 @@
+﻿
+++ Setup
+
+1. Create new Web Application
+Presentation/MicroRabbit.MVC
+
+2. Modify port for applicationUrl in launchSettings to avoid conflict with the 2 Microservices
+"applicationUrl": "https://localhost:5005;http://localhost:5004",
+
+3. Set MicroRabbit.MVC as Startup project
+
+
+++ ViewModel / DTO
+
+1. Create ViewModel (TransferViewModel)
+MicroRabbit.MVC/Models/TransferViewModel.cs
+public class TransferViewModel
+{
+    public string TransferNotes { get; set; }
+    public int FromAccount { get; set; }
+    public int ToAccount { get; set; }
+    public decimal TransferAmount { get; set; }
+}
+
+2. Create DTO (TransferDto)
+- Same properties for the Banking Api (MicroRabbit.Banking.Application/Models/AccountTransfer.cs)
+
+public class TransferDto
+{
+    public int FromAccount { get; set; }
+    public int ToAccount { get; set; }
+    public decimal TransferAmount { get; set; }
+}
+
+
+++ Local "Proxy" Transfer Service, that communicates to Http to the Microservice
+
+1. Create ITransferService interface
+MicroRabbit.MVC/Services/ITransferService.cs
+public interface ITransferService
+{
+    Task Transfer(TransferDto transferDto);
+}
+
+2. Create concrete class TransferService
+...
+public class TransferService : ITransferService
+...
+
+// ViewModel to Dto to the Transfer method, Serialize and pass to Microservice
+2.1 Inject HttpClient
+...
+private readonly HttpClient _apiClient;
+
+public TransferService(HttpClient apiClient)
+{
+    _apiClient = apiClient;
+}
+...
+
+2.2  Implement Transfer method
+// Serialize data as json
+// Post passing uri and content
+// Response as EnsureSuccessStatusCode
+https://stackoverflow.com/questions/21097730/usage-of-ensuresuccessstatuscode-and-handling-of-httprequestexception-it-throws
+- The idiomatic usage of EnsureSuccessStatusCode is to concisely verify success of a request, when you don't want to handle failure cases in any specific way. 
+- This is especially useful when you want to quickly prototype a client.
+
+public async Task Transfer(TransferDto transferDto)
+{
+    var uri = "https://localhost/5001/api/Banking";
+    var transferContent = new StringContent(JsonConvert.SerializeObject(transferDto), Encoding.UTF8, "application/json");
+
+    var response = await _apiClient.PostAsync(uri, transferContent);
+    response.EnsureSuccessStatusCode();
+}
+
+3. Configure Startup.cs
+3.1  Map service, from interface to concrete
+public void ConfigureServices(IServiceCollection services)
+{
+    ...
+    services.AddHttpClient<ITransferService, TransferService>();
+}
+
+
+++ Controller setup
+
+1. Inject ITransferService to HomeController
+...
+private readonly ITransferService _transferService;
+...
+
+public HomeController(ITransferService transferService, ILogger<HomeController> logger)
+{
+    _transferService = transferService;
+    ...
+}
+
+2. Implement Transfer HttpPost method
+// Overall goal is to be able to communicate to our Microservice from the Presentation layer
+
+[HttpPost]
+public async Task<IActionResult> Transfer(TransferViewModel model)
+{
+    TransferDto transferDto = new TransferDto
+    {
+        FromAccount = model.FromAccount,
+        ToAccount = model.ToAccount,
+        TransferAmount = model.TransferAmount
+    };
+
+    await _transferService.Transfer(transferDto);
+
+    return View("Index");
+}
+
+++ View setup
+
+1. Modiify View under Views/Home/Index.cshtml
+<form action="/home/transfer" method="post">
+    <label for="FromAccount">From Account:</label>
+    <input type="text" name="FromAccount" />
+
+    <label for="ToAccount">To Account:</label>
+    <input type="text" name="ToAccount" />
+
+    <label for="TransferAmount">Amount:</label>
+    <input type="text" name="TransferAmount" />
+
+    <input type="submit" name="Transfer" />
+</form>
+
+
+
+++ Test
+!! Ensure RabbitMq is running
+1. Right click solution Set Startup Projects
+MicroRabbit.MVC - Start
+MicroRabbit.Banking.Api - Start
+MicroRabbit.Tranfer.Api - Off
+
+2. Place breakpoints in
+- HomeController.cs/Transfer method
+- TransferService.cs/Transfer method
+- BankingController.cs/Post method
+
+3. Check RabbitMq UI, Queue tab to verify message
