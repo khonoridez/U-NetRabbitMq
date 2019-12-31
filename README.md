@@ -1,1 +1,3 @@
-# Notes from .Net RabbitMq
+# Notes from .Net Microservice using RabbitMq
+
+Utilizing Clean Architecture, MediatR (CQRS pattern) and RabbitMq
