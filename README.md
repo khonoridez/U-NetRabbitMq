@@ -1,1 +1,1 @@
-# U-NetRabbitMq
+# Notes from .Net RabbitMq
